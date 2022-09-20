@@ -1,4 +1,4 @@
-package kaptainwutax.tungsten.frame;
+package kaptainwutax.tungsten.agent;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -7,15 +7,15 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.RaycastContext;
 
-public class FrameRaycastContext extends RaycastContext {
+public class AgentRaycastContext extends RaycastContext {
 
 	private final ShapeType shapeType;
-	private final FrameShapeContext shapeContext;
+	private final AgentShapeContext shapeContext;
 
-	public FrameRaycastContext(Vec3d start, Vec3d end, ShapeType shapeType, FluidHandling fluidHandling, Frame frame) {
+	public AgentRaycastContext(Vec3d start, Vec3d end, ShapeType shapeType, FluidHandling fluidHandling, Agent agent) {
 		super(start, end, shapeType, fluidHandling, null);
 		this.shapeType = shapeType;
-		this.shapeContext = new FrameShapeContext(frame);
+		this.shapeContext = new AgentShapeContext(agent);
 	}
 
 	@Override

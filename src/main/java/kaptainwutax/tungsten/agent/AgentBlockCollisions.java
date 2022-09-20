@@ -1,4 +1,4 @@
-package kaptainwutax.tungsten.frame;
+package kaptainwutax.tungsten.agent;
 
 import com.google.common.collect.AbstractIterator;
 import net.minecraft.block.BlockState;
@@ -13,7 +13,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.CollisionView;
 import org.jetbrains.annotations.Nullable;
 
-public class FrameBlockCollisions extends AbstractIterator<VoxelShape> {
+public class AgentBlockCollisions extends AbstractIterator<VoxelShape> {
 
     private final Box box;
     private final ShapeContext context;
@@ -26,12 +26,12 @@ public class FrameBlockCollisions extends AbstractIterator<VoxelShape> {
     private long chunkPos;
     public int scannedBlocks;
 
-    public FrameBlockCollisions(CollisionView world, Frame frame, Box box) {
-        this(world, frame, box, false);
+    public AgentBlockCollisions(CollisionView world, Agent agent, Box box) {
+        this(world, agent, box, false);
     }
 
-    public FrameBlockCollisions(CollisionView world, Frame frame, Box box, boolean forEntity) {
-        this.context = new FrameShapeContext(frame);
+    public AgentBlockCollisions(CollisionView world, Agent agent, Box box, boolean forEntity) {
+        this.context = new AgentShapeContext(agent);
         this.pos = new BlockPos.Mutable();
         this.boxShape = VoxelShapes.cuboid(box);
         this.world = world;

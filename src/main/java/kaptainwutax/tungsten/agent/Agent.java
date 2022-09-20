@@ -1,4 +1,4 @@
-package kaptainwutax.tungsten.frame;
+package kaptainwutax.tungsten.agent;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -28,9 +28,9 @@ import net.minecraft.world.WorldView;
 
 import java.util.*;
 
-public class Frame {
+public class Agent {
 
-    public static Frame INSTANCE;
+    public static Agent INSTANCE;
 
     public static final EntityDimensions STANDING_DIMENSIONS = EntityDimensions.changing(0.6f, 1.8f);
     public static final EntityDimensions SLEEPING_DIMENSIONS = EntityDimensions.fixed(0.2f, 0.2f);
@@ -52,7 +52,7 @@ public class Frame {
     public boolean keyJump;
     public boolean keySneak;
     public boolean keySprint;
-    public FrameInput input = new FrameInput(this);
+    public AgentInput input = new AgentInput(this);
 
     public EntityPose pose;
     public boolean inSneakingPose;
@@ -124,7 +124,7 @@ public class Frame {
         this.blockZ = MathHelper.floor(z);
     }
 
-    public Frame tick(WorldView world) {
+    public Agent tick(WorldView world) {
         this.tickPlayer(world);
         return this;
     }
@@ -625,7 +625,7 @@ public class Frame {
     }
 
     public Iterable<VoxelShape> getBlockCollisions(WorldView world, Box box) {
-        return () -> new FrameBlockCollisions(world, this, box);
+        return () -> new AgentBlockCollisions(world, this, box);
     }
 
     public boolean isSpaceEmpty(WorldView world, Box box) {
@@ -672,7 +672,7 @@ public class Frame {
 
 		if(magnitudeSq > 0.0000001D) {
             if(this.fallDistance != 0.0F && magnitudeSq >= 1.0D) {
-                RaycastContext context = new FrameRaycastContext(this.getPos(), this.getPos().add(new Vec3d(ajuX, ajuY, ajuZ)),
+                RaycastContext context = new AgentRaycastContext(this.getPos(), this.getPos().add(new Vec3d(ajuX, ajuY, ajuZ)),
                     RaycastContext.ShapeType.FALLDAMAGE_RESETTING, RaycastContext.FluidHandling.WATER, this);
                 BlockHitResult result = world.raycast(context);
 
@@ -1148,7 +1148,7 @@ public class Frame {
     }
 
     public boolean canCollide(WorldView world, Box box) {
-        FrameBlockCollisions collisions = new FrameBlockCollisions(world, this, box, true);
+        AgentBlockCollisions collisions = new AgentBlockCollisions(world, this, box, true);
 
         if(!collisions.hasNext()) {
             this.scannedBlocks += collisions.scannedBlocks;
@@ -1385,156 +1385,156 @@ public class Frame {
         }
     }
 
-    public static Frame of(ClientPlayerEntity player) {
-        Frame frame = new Frame();
-        frame.keyForward = MinecraftClient.getInstance().options.forwardKey.isPressed();
-        frame.keyBack = MinecraftClient.getInstance().options.backKey.isPressed();
-        frame.keyLeft = MinecraftClient.getInstance().options.leftKey.isPressed();
-        frame.keyRight = MinecraftClient.getInstance().options.rightKey.isPressed();
-        frame.keyJump = MinecraftClient.getInstance().options.jumpKey.isPressed();
-        frame.keySneak = MinecraftClient.getInstance().options.sneakKey.isPressed();
-        frame.keySprint = MinecraftClient.getInstance().options.sprintKey.isPressed();
+    public static Agent of(ClientPlayerEntity player) {
+        Agent agent = new Agent();
+        agent.keyForward = MinecraftClient.getInstance().options.forwardKey.isPressed();
+        agent.keyBack = MinecraftClient.getInstance().options.backKey.isPressed();
+        agent.keyLeft = MinecraftClient.getInstance().options.leftKey.isPressed();
+        agent.keyRight = MinecraftClient.getInstance().options.rightKey.isPressed();
+        agent.keyJump = MinecraftClient.getInstance().options.jumpKey.isPressed();
+        agent.keySneak = MinecraftClient.getInstance().options.sneakKey.isPressed();
+        agent.keySprint = MinecraftClient.getInstance().options.sprintKey.isPressed();
 
-        frame.input.movementSideways = player.input.movementSideways;
-        frame.input.movementForward = player.input.movementForward;
-        frame.input.pressingForward = player.input.pressingForward;
-        frame.input.pressingBack = player.input.pressingBack;
-        frame.input.pressingLeft = player.input.pressingLeft;
-        frame.input.pressingRight = player.input.pressingRight;
-        frame.input.jumping = player.input.jumping;
-        frame.input.sneaking = player.input.sneaking;
+        agent.input.movementSideways = player.input.movementSideways;
+        agent.input.movementForward = player.input.movementForward;
+        agent.input.pressingForward = player.input.pressingForward;
+        agent.input.pressingBack = player.input.pressingBack;
+        agent.input.pressingLeft = player.input.pressingLeft;
+        agent.input.pressingRight = player.input.pressingRight;
+        agent.input.jumping = player.input.jumping;
+        agent.input.sneaking = player.input.sneaking;
 
-        frame.pose = player.getPose();
-        frame.inSneakingPose = player.isInSneakingPose();
-        frame.usingItem = player.isUsingItem();
-        frame.sidewaysSpeed = player.sidewaysSpeed;
-        frame.upwardSpeed = player.upwardSpeed;
-        frame.forwardSpeed = player.forwardSpeed;
-        frame.yaw = player.getYaw();
-        frame.pitch = player.getPitch();
-        frame.posX = player.getX();
-        frame.posY = player.getY();
-        frame.posZ = player.getZ();
-        frame.blockX = player.getBlockPos().getX();
-        frame.blockY = player.getBlockPos().getY();
-        frame.blockZ = player.getBlockPos().getZ();
-        frame.velX = player.getVelocity().x;
-        frame.velY = player.getVelocity().y;
-        frame.velZ = player.getVelocity().z;
-        frame.mulX = ((AccessorEntity)player).getMovementMultiplier().x;
-        frame.mulY = ((AccessorEntity)player).getMovementMultiplier().y;
-        frame.mulZ = ((AccessorEntity)player).getMovementMultiplier().z;
-        frame.fluidHeight.put(FluidTags.WATER, player.getFluidHeight(FluidTags.WATER));
-        frame.fluidHeight.put(FluidTags.LAVA, player.getFluidHeight(FluidTags.LAVA));
-        frame.submergedFluids.addAll(((AccessorEntity)player).getSubmergedFluidTag());
-        frame.firstUpdate = ((AccessorEntity)player).getFirstUpdate();
-        frame.box = player.getBoundingBox();
-        frame.dimensions = player.getDimensions(player.getPose());
-        frame.standingEyeHeight = player.getStandingEyeHeight();
-        frame.onGround = player.isOnGround();
-        frame.sleeping = player.isSleeping();
-        frame.sneaking = player.isSneaky();
-        frame.sprinting = player.isSprinting();
-        frame.swimming = player.isSwimming();
-        frame.fallFlying = player.isFallFlying();
-        frame.stepHeight = player.stepHeight;
-        frame.fallDistance = player.fallDistance;
-        frame.touchingWater = player.isTouchingWater();
-        frame.isSubmergedInWater = player.isSubmergedInWater();
-        frame.horizontalCollision = player.horizontalCollision;
-        frame.verticalCollision = player.verticalCollision;
-        frame.collidedSoftly = player.collidedSoftly;
-        frame.jumping = ((AccessorLivingEntity)player).getJumping();
-        frame.speed = player.hasStatusEffect(StatusEffects.SPEED) ? player.getStatusEffect(StatusEffects.SPEED).getAmplifier() : -1;
-        frame.blindness = player.hasStatusEffect(StatusEffects.BLINDNESS) ? player.getStatusEffect(StatusEffects.BLINDNESS).getAmplifier() : -1;
-        frame.jumpBoost = player.hasStatusEffect(StatusEffects.JUMP_BOOST) ? player.getStatusEffect(StatusEffects.JUMP_BOOST).getAmplifier() : -1;
-        frame.slowFalling = player.hasStatusEffect(StatusEffects.SLOW_FALLING) ? player.getStatusEffect(StatusEffects.SLOW_FALLING).getAmplifier() : -1;
-        frame.dolphinsGrace = player.hasStatusEffect(StatusEffects.DOLPHINS_GRACE) ? player.getStatusEffect(StatusEffects.DOLPHINS_GRACE).getAmplifier() : -1;
-        frame.levitation = player.hasStatusEffect(StatusEffects.LEVITATION) ? player.getStatusEffect(StatusEffects.LEVITATION).getAmplifier() : -1;
-        frame.movementSpeed = player.getMovementSpeed();
-        frame.airStrafingSpeed = player.airStrafingSpeed;
-        frame.jumpingCooldown = ((AccessorLivingEntity)player).getJumpingCooldown();
+        agent.pose = player.getPose();
+        agent.inSneakingPose = player.isInSneakingPose();
+        agent.usingItem = player.isUsingItem();
+        agent.sidewaysSpeed = player.sidewaysSpeed;
+        agent.upwardSpeed = player.upwardSpeed;
+        agent.forwardSpeed = player.forwardSpeed;
+        agent.yaw = player.getYaw();
+        agent.pitch = player.getPitch();
+        agent.posX = player.getX();
+        agent.posY = player.getY();
+        agent.posZ = player.getZ();
+        agent.blockX = player.getBlockPos().getX();
+        agent.blockY = player.getBlockPos().getY();
+        agent.blockZ = player.getBlockPos().getZ();
+        agent.velX = player.getVelocity().x;
+        agent.velY = player.getVelocity().y;
+        agent.velZ = player.getVelocity().z;
+        agent.mulX = ((AccessorEntity)player).getMovementMultiplier().x;
+        agent.mulY = ((AccessorEntity)player).getMovementMultiplier().y;
+        agent.mulZ = ((AccessorEntity)player).getMovementMultiplier().z;
+        agent.fluidHeight.put(FluidTags.WATER, player.getFluidHeight(FluidTags.WATER));
+        agent.fluidHeight.put(FluidTags.LAVA, player.getFluidHeight(FluidTags.LAVA));
+        agent.submergedFluids.addAll(((AccessorEntity)player).getSubmergedFluidTag());
+        agent.firstUpdate = ((AccessorEntity)player).getFirstUpdate();
+        agent.box = player.getBoundingBox();
+        agent.dimensions = player.getDimensions(player.getPose());
+        agent.standingEyeHeight = player.getStandingEyeHeight();
+        agent.onGround = player.isOnGround();
+        agent.sleeping = player.isSleeping();
+        agent.sneaking = player.isSneaky();
+        agent.sprinting = player.isSprinting();
+        agent.swimming = player.isSwimming();
+        agent.fallFlying = player.isFallFlying();
+        agent.stepHeight = player.stepHeight;
+        agent.fallDistance = player.fallDistance;
+        agent.touchingWater = player.isTouchingWater();
+        agent.isSubmergedInWater = player.isSubmergedInWater();
+        agent.horizontalCollision = player.horizontalCollision;
+        agent.verticalCollision = player.verticalCollision;
+        agent.collidedSoftly = player.collidedSoftly;
+        agent.jumping = ((AccessorLivingEntity)player).getJumping();
+        agent.speed = player.hasStatusEffect(StatusEffects.SPEED) ? player.getStatusEffect(StatusEffects.SPEED).getAmplifier() : -1;
+        agent.blindness = player.hasStatusEffect(StatusEffects.BLINDNESS) ? player.getStatusEffect(StatusEffects.BLINDNESS).getAmplifier() : -1;
+        agent.jumpBoost = player.hasStatusEffect(StatusEffects.JUMP_BOOST) ? player.getStatusEffect(StatusEffects.JUMP_BOOST).getAmplifier() : -1;
+        agent.slowFalling = player.hasStatusEffect(StatusEffects.SLOW_FALLING) ? player.getStatusEffect(StatusEffects.SLOW_FALLING).getAmplifier() : -1;
+        agent.dolphinsGrace = player.hasStatusEffect(StatusEffects.DOLPHINS_GRACE) ? player.getStatusEffect(StatusEffects.DOLPHINS_GRACE).getAmplifier() : -1;
+        agent.levitation = player.hasStatusEffect(StatusEffects.LEVITATION) ? player.getStatusEffect(StatusEffects.LEVITATION).getAmplifier() : -1;
+        agent.movementSpeed = player.getMovementSpeed();
+        agent.airStrafingSpeed = player.airStrafingSpeed;
+        agent.jumpingCooldown = ((AccessorLivingEntity)player).getJumpingCooldown();
 
         //TODO: frame.ticksToNextAutojump
-        return frame;
+        return agent;
     }
 
-    public static Frame of(Frame other, boolean forward, boolean back, boolean left, boolean right, boolean jump, boolean sneak, boolean sprint, float pitch, float yaw) {
-        Frame frame = new Frame();
-        frame.keyForward = forward;
-        frame.keyBack = back;
-        frame.keyLeft = left;
-        frame.keyRight = right;
-        frame.keyJump = jump;
-        frame.keySneak = sneak;
-        frame.keySprint = sprint;
+    public static Agent of(Agent other, boolean forward, boolean back, boolean left, boolean right, boolean jump, boolean sneak, boolean sprint, float pitch, float yaw) {
+        Agent agent = new Agent();
+        agent.keyForward = forward;
+        agent.keyBack = back;
+        agent.keyLeft = left;
+        agent.keyRight = right;
+        agent.keyJump = jump;
+        agent.keySneak = sneak;
+        agent.keySprint = sprint;
 
-        frame.input.movementSideways = other.input.movementSideways;
-        frame.input.movementForward = other.input.movementForward;
-        frame.input.pressingForward = other.input.pressingForward;
-        frame.input.pressingBack = other.input.pressingBack;
-        frame.input.pressingLeft = other.input.pressingLeft;
-        frame.input.pressingRight = other.input.pressingRight;
-        frame.input.jumping = other.input.jumping;
-        frame.input.sneaking = other.input.sneaking;
+        agent.input.movementSideways = other.input.movementSideways;
+        agent.input.movementForward = other.input.movementForward;
+        agent.input.pressingForward = other.input.pressingForward;
+        agent.input.pressingBack = other.input.pressingBack;
+        agent.input.pressingLeft = other.input.pressingLeft;
+        agent.input.pressingRight = other.input.pressingRight;
+        agent.input.jumping = other.input.jumping;
+        agent.input.sneaking = other.input.sneaking;
 
-        frame.pose = other.pose;
-        frame.inSneakingPose = other.inSneakingPose;
-        frame.usingItem = other.usingItem;
-        frame.sidewaysSpeed = other.sidewaysSpeed;
-        frame.upwardSpeed = other.upwardSpeed;
-        frame.forwardSpeed = other.forwardSpeed;
-        frame.yaw = yaw;
-        frame.pitch = pitch;
-        frame.posX = other.posX;
-        frame.posY = other.posY;
-        frame.posZ = other.posZ;
-        frame.blockX = other.blockX;
-        frame.blockY = other.blockY;
-        frame.blockZ = other.blockZ;
-        frame.velX = other.velX;
-        frame.velY = other.velY;
-        frame.velZ = other.velZ;
-        frame.mulX = other.mulX;
-        frame.mulY = other.mulY;
-        frame.mulZ = other.mulZ;
-        frame.fluidHeight.put(FluidTags.WATER, other.getFluidHeight(FluidTags.WATER));
-        frame.fluidHeight.put(FluidTags.LAVA, other.getFluidHeight(FluidTags.LAVA));
-        frame.submergedFluids.addAll(other.submergedFluids);
-        frame.firstUpdate = other.firstUpdate;
-        frame.dimensions = other.dimensions;
-        frame.box = other.box;
-        frame.standingEyeHeight = other.standingEyeHeight;
-        frame.onGround = other.onGround;
-        frame.sleeping = other.sleeping;
-        frame.sneaking = other.sneaking;
-        frame.sprinting = other.sprinting;
-        frame.swimming = other.swimming;
-        frame.fallFlying = other.fallFlying;
-        frame.stepHeight = other.stepHeight;
-        frame.fallDistance = other.fallDistance;
-        frame.touchingWater = other.touchingWater;
-        frame.isSubmergedInWater = other.isSubmergedInWater;
-        frame.horizontalCollision = other.horizontalCollision;
-        frame.verticalCollision = other.verticalCollision;
-        frame.collidedSoftly = other.collidedSoftly;
-        frame.jumping = other.jumping;
-        frame.speed = other.speed;
-        frame.blindness = other.blindness;
-        frame.jumpBoost = other.jumpBoost;
-        frame.slowFalling = other.slowFalling;
-        frame.dolphinsGrace = other.dolphinsGrace;
-        frame.levitation = other.levitation;
-        frame.depthStrider = other.depthStrider;
-        frame.movementSpeed = other.movementSpeed;
-        frame.airStrafingSpeed = other.airStrafingSpeed;
-        frame.jumpingCooldown = other.jumpingCooldown;
+        agent.pose = other.pose;
+        agent.inSneakingPose = other.inSneakingPose;
+        agent.usingItem = other.usingItem;
+        agent.sidewaysSpeed = other.sidewaysSpeed;
+        agent.upwardSpeed = other.upwardSpeed;
+        agent.forwardSpeed = other.forwardSpeed;
+        agent.yaw = yaw;
+        agent.pitch = pitch;
+        agent.posX = other.posX;
+        agent.posY = other.posY;
+        agent.posZ = other.posZ;
+        agent.blockX = other.blockX;
+        agent.blockY = other.blockY;
+        agent.blockZ = other.blockZ;
+        agent.velX = other.velX;
+        agent.velY = other.velY;
+        agent.velZ = other.velZ;
+        agent.mulX = other.mulX;
+        agent.mulY = other.mulY;
+        agent.mulZ = other.mulZ;
+        agent.fluidHeight.put(FluidTags.WATER, other.getFluidHeight(FluidTags.WATER));
+        agent.fluidHeight.put(FluidTags.LAVA, other.getFluidHeight(FluidTags.LAVA));
+        agent.submergedFluids.addAll(other.submergedFluids);
+        agent.firstUpdate = other.firstUpdate;
+        agent.dimensions = other.dimensions;
+        agent.box = other.box;
+        agent.standingEyeHeight = other.standingEyeHeight;
+        agent.onGround = other.onGround;
+        agent.sleeping = other.sleeping;
+        agent.sneaking = other.sneaking;
+        agent.sprinting = other.sprinting;
+        agent.swimming = other.swimming;
+        agent.fallFlying = other.fallFlying;
+        agent.stepHeight = other.stepHeight;
+        agent.fallDistance = other.fallDistance;
+        agent.touchingWater = other.touchingWater;
+        agent.isSubmergedInWater = other.isSubmergedInWater;
+        agent.horizontalCollision = other.horizontalCollision;
+        agent.verticalCollision = other.verticalCollision;
+        agent.collidedSoftly = other.collidedSoftly;
+        agent.jumping = other.jumping;
+        agent.speed = other.speed;
+        agent.blindness = other.blindness;
+        agent.jumpBoost = other.jumpBoost;
+        agent.slowFalling = other.slowFalling;
+        agent.dolphinsGrace = other.dolphinsGrace;
+        agent.levitation = other.levitation;
+        agent.depthStrider = other.depthStrider;
+        agent.movementSpeed = other.movementSpeed;
+        agent.airStrafingSpeed = other.airStrafingSpeed;
+        agent.jumpingCooldown = other.jumpingCooldown;
         //TODO: frame.ticksToNextAutojump
-        return frame;
+        return agent;
     }
 
-    public static Frame of(Frame frame, PathInput input) {
-        return of(frame, input.forward, input.back, input.left, input.right, input.jump, input.sneak, input.sprint, input.pitch, input.yaw);
+    public static Agent of(Agent agent, PathInput input) {
+        return of(agent, input.forward, input.back, input.left, input.right, input.jump, input.sneak, input.sprint, input.pitch, input.yaw);
     }
 
 }

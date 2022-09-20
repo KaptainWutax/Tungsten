@@ -2,16 +2,13 @@ package kaptainwutax.tungsten.mixin;
 
 import com.mojang.authlib.GameProfile;
 import kaptainwutax.tungsten.TungstenMod;
-import kaptainwutax.tungsten.frame.Frame;
+import kaptainwutax.tungsten.agent.Agent;
 import kaptainwutax.tungsten.path.PathFinder;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.encryption.PlayerPublicKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,8 +30,8 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
 		}
 
 		if(!this.getAbilities().flying) {
-			Frame.INSTANCE = Frame.of((ClientPlayerEntity)(Object)this);
-			Frame.INSTANCE.tick(this.world);
+			Agent.INSTANCE = Agent.of((ClientPlayerEntity)(Object)this);
+			Agent.INSTANCE.tick(this.world);
 		}
 
 		if(MinecraftClient.getInstance().options.swapHandsKey.isPressed()) {
@@ -45,18 +42,22 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
 	@Inject(method = "tick", at = @At(value = "RETURN"))
 	public void end(CallbackInfo ci) {
 		if(!this.getAbilities().flying) {
-			Frame.INSTANCE.compare((ClientPlayerEntity)(Object)this, false);
+			Agent.INSTANCE.compare((ClientPlayerEntity)(Object)this, false);
 		}
 	}
 
 	@Inject(method="getPitch", at=@At("RETURN"), cancellable = true)
 	public void getPitch(float tickDelta, CallbackInfoReturnable<Float> ci) {
-		ci.setReturnValue(super.getPitch(tickDelta));
+		if(TungstenMod.EXECUTOR.isRunning()) {
+			ci.setReturnValue(super.getPitch(tickDelta));
+		}
 	}
 
 	@Inject(method="getYaw", at=@At("RETURN"), cancellable = true)
 	public void getYaw(float tickDelta, CallbackInfoReturnable<Float> ci) {
-		ci.setReturnValue(super.getYaw(tickDelta));
+		if(TungstenMod.EXECUTOR.isRunning()) {
+			ci.setReturnValue(super.getYaw(tickDelta));
+		}
 	}
 
 }

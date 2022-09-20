@@ -1,9 +1,9 @@
 package kaptainwutax.tungsten.path;
 
 import kaptainwutax.tungsten.TungstenMod;
+import kaptainwutax.tungsten.agent.Agent;
 import kaptainwutax.tungsten.render.Cuboid;
 import kaptainwutax.tungsten.render.Line;
-import kaptainwutax.tungsten.frame.Frame;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.Vec3d;
@@ -35,7 +35,7 @@ public class PathFinder {
 
 		ClientPlayerEntity player = Objects.requireNonNull(MinecraftClient.getInstance().player);
 
-		Node start = new Node(null, Frame.of(player), null, 0);
+		Node start = new Node(null, Agent.of(player), null, 0);
 
 		Queue<Node> open = new PriorityQueue<>(Comparator.comparingDouble(o -> o.pathCost + o.heuristic));
 		Set<Vec3d> closed = new HashSet<>();
@@ -44,18 +44,18 @@ public class PathFinder {
 
 		while(!open.isEmpty()) {
 			Node next = open.poll();
-			closed.add(next.frame.getPos());
+			closed.add(next.agent.getPos());
 			if(closed.size() > 100000)break;
 
-			if(next.frame.getPos().squaredDistanceTo(target) <= 1.0D) {
+			if(next.agent.getPos().squaredDistanceTo(target) <= 1.0D) {
 				TungstenMod.RENDERERS.clear();
 				Node n = next;
 				List<Node> path = new ArrayList<>();
 
 				while(n.parent != null) {
 					path.add(n);
-					TungstenMod.RENDERERS.add(new Line(n.frame.getPos(), n.parent.frame.getPos(), n.color));
-					TungstenMod.RENDERERS.add(new Cuboid(n.frame.getPos().subtract(0.05D, 0.05D, 0.05D), new Vec3d(0.1D, 0.1D, 0.1D), n.color));
+					TungstenMod.RENDERERS.add(new Line(n.agent.getPos(), n.parent.agent.getPos(), n.color));
+					TungstenMod.RENDERERS.add(new Cuboid(n.agent.getPos().subtract(0.05D, 0.05D, 0.05D), new Vec3d(0.1D, 0.1D, 0.1D), n.color));
 					n = n.parent;
 				}
 
@@ -66,8 +66,8 @@ public class PathFinder {
 			}
 
 			for(Node child : next.getChildren(world)) {
-				if(closed.contains(child.frame.getPos()))continue;
-				child.heuristic = child.pathCost / child.frame.getPos().distanceTo(start.frame.getPos()) * child.frame.getPos().distanceTo(target);
+				if(closed.contains(child.agent.getPos()))continue;
+				child.heuristic = child.pathCost / child.agent.getPos().distanceTo(start.agent.getPos()) * child.agent.getPos().distanceTo(target);
 				//child.heuristic = 20.0D * child.frame.getPos().distanceTo(target);
 				open.add(child);
 
@@ -75,7 +75,7 @@ public class PathFinder {
 					TungstenMod.RENDERERS.clear();
 				}
 
-				TungstenMod.RENDERERS.add(new Line(child.frame.getPos(), child.parent.frame.getPos(), child.color));
+				TungstenMod.RENDERERS.add(new Line(child.agent.getPos(), child.parent.agent.getPos(), child.color));
 			}
 		}
 	}

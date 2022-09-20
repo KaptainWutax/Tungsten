@@ -1,25 +1,25 @@
-package kaptainwutax.tungsten.frame;
+package kaptainwutax.tungsten.agent;
 
 import net.minecraft.client.input.Input;
 
-public class FrameInput extends Input {
+public class AgentInput extends Input {
 
-	private final Frame frame;
+	private final Agent agent;
 
-	public FrameInput(Frame frame) {
-		this.frame = frame;
+	public AgentInput(Agent agent) {
+		this.agent = agent;
 	}
 	
 	@Override
 	public void tick(boolean slowDown, float sneakSpeed) {
-		this.pressingForward = this.frame.keyForward;
-		this.pressingBack = this.frame.keyBack;
-		this.pressingLeft = this.frame.keyLeft;
-		this.pressingRight = this.frame.keyRight;
+		this.pressingForward = this.agent.keyForward;
+		this.pressingBack = this.agent.keyBack;
+		this.pressingLeft = this.agent.keyLeft;
+		this.pressingRight = this.agent.keyRight;
 		this.movementForward = this.pressingForward == this.pressingBack ? 0.0f : (this.pressingForward ? 1.0f : -1.0f);
 		this.movementSideways = this.pressingLeft == this.pressingRight ? 0.0f : (this.pressingLeft ? 1.0f : -1.0f);
-		this.jumping = this.frame.keyJump;
-		this.sneaking = this.frame.keySneak;
+		this.jumping = this.agent.keyJump;
+		this.sneaking = this.agent.keySneak;
 
 		if(slowDown) {
 			this.movementSideways *= sneakSpeed;

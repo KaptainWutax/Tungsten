@@ -1,4 +1,4 @@
-package kaptainwutax.tungsten.frame;
+package kaptainwutax.tungsten.agent;
 
 import net.minecraft.block.EntityShapeContext;
 import net.minecraft.block.ShapeContext;
@@ -12,7 +12,7 @@ import net.minecraft.util.shape.VoxelShape;
 
 import java.util.function.Predicate;
 
-public class FrameShapeContext implements ShapeContext {
+public class AgentShapeContext implements ShapeContext {
 
     protected static final ShapeContext ABSENT = new EntityShapeContext(false, -1.7976931348623157E308, ItemStack.EMPTY, fluidState -> false, null) {
         @Override
@@ -26,15 +26,15 @@ public class FrameShapeContext implements ShapeContext {
     private final ItemStack heldItem;
     private final Predicate<FluidState> walkOnFluidPredicate;
 
-    protected FrameShapeContext(boolean descending, double minY, ItemStack heldItem, Predicate<FluidState> walkOnFluidPredicate) {
+    protected AgentShapeContext(boolean descending, double minY, ItemStack heldItem, Predicate<FluidState> walkOnFluidPredicate) {
         this.descending = descending;
         this.minY = minY;
         this.heldItem = heldItem;
         this.walkOnFluidPredicate = walkOnFluidPredicate;
     }
 
-    protected FrameShapeContext(Frame frame) {
-        this(frame.input.sneaking, frame.box.minY, ItemStack.EMPTY, fluidState -> false);
+    protected AgentShapeContext(Agent agent) {
+        this(agent.input.sneaking, agent.box.minY, ItemStack.EMPTY, fluidState -> false);
     }
 
     @Override
