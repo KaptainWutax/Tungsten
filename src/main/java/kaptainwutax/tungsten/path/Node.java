@@ -29,9 +29,11 @@ public class Node {
 	}
 
 	public Node[] getChildren(WorldView world) {
+		/*
 		Node n = this.parent;
 		boolean mismatch = false;
 		int i;
+
 
 		for(i = 0; i < 4 && n != null; i++) {
 			if(n.frame.blockX != this.frame.blockX || n.frame.blockY != this.frame.blockY || n.frame.blockZ != this.frame.blockZ) {
@@ -45,7 +47,7 @@ public class Node {
 		if(!mismatch && i == 5) {
 			return new Node[] {};
 		}
-
+*/
 		if(this.frame.onGround || this.frame.touchingWater) {
 			return new Node[] {
 				new Node(this, world, new PathInput(true, false, false, false, true,
